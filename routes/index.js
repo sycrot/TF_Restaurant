@@ -2,6 +2,7 @@ var conn = require('./../inc/db');
 var express = require('express');
 var menus = require('./../inc/menus');
 var reservation = require('./../inc/reservation');
+var contacts = require('./../inc/contact');
 var router = express.Router();
 
 /* GET home page. */
@@ -17,17 +18,37 @@ router.get('/', function(req, res, next) {
   
 });
 
+
+// contacts
 router.get('/contacts', function(req, res, next) {
 
-  res.render('contact', {
-    title: 'Contato - TF Restaurant',
-    background: 'images/img_bg_3.jpg',
-    h1: 'Diga um oioio',
-    isHome: false
-  });
+  contacts.render(req, res);
 
 });
 
+router.post('/contacts', function(req, res, next) {
+
+  if (!req.body.name) {
+    contacts.render(req, res, "Digite o nome");
+  } else if (!req.body.email) {
+    contacts.render(req, res, "Digite o e-mail");
+  }else if (!req.body.message) {
+    contacts.render(req, res, "Digite a messagem");
+  } else {
+    
+    contacts.save(req.body).then(results => {
+      req.body = {};
+      contacts.render(req, res, null, "Contato enviado!");
+    }).catch(err => {
+      contacts.render(req, res, err.message);
+    });
+
+  }
+
+});
+// --|
+
+// menus
 router.get('/menus', function(req, res, next) {
 
   menus.getMenus().then(results => {
@@ -45,6 +66,9 @@ router.get('/menus', function(req, res, next) {
 
 });
 
+// --|
+
+// reservations
 router.get('/reservations', function(req, res, next) {
 
   reservation.render(req, res);
@@ -75,7 +99,9 @@ router.post('/reservations', function(req, res, next) {
   }
 
 });
+// --|
 
+// services
 router.get('/services', function(req, res, next) {
 
   res.render('services', {
@@ -86,5 +112,6 @@ router.get('/services', function(req, res, next) {
   });
 
 });
+// --|
 
 module.exports = router;
