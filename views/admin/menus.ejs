@@ -43,9 +43,8 @@
                   <td><%= row.title %></td>
                   <td><%= row.description %></td>
                   <td><%= row.price %></td>
-                  <td><button type="button" class="btn btn-xs btn-info btn-update"><i
-                        class="fa fa-pencil"></i> Editar</button>&nbsp;<button type="button" class="btn btn-xs btn-danger btn-delete"><i
-                        class="fa fa-trash"></i> Excluir</button></td>
+                  <td><button type="button" class="btn btn-xs btn-info btn-update"><i class="fa fa-pencil"></i> Editar</button>
+                  <button type="button" class="btn btn-xs btn-danger btn-delete"><i class="fa fa-trash"></i> Excluir</button></td>
                 </tr>
                 <% }); %> 
               </tbody>
@@ -102,7 +101,7 @@
     <div class="modal fade" id="modal-update">
       <div class="modal-dialog">
         <div class="modal-content" style="border-top: 3px solid #00c0ef;">
-          <form method="post">
+          <form method="post" action="/admin/menus">
             <input type="hidden" name="id">
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -142,33 +141,66 @@
 
     <%- include('inc/page-footer') -%> 
 
+
+<script src="/js/hcode-filereader.js"></script>
+<script src="/js/hcode-formsave.js"></script>
 <script>
 
+
+new HcodeFileReader("#modal-update [type=file]", "#modal-update img");
+  new HcodeFileReader("#modal-create [type=file]", "#modal-create img");
+
+  // create data
   let formCreate = document.querySelector('#modal-create form');
   
-  formCreate.addEventListener('submit', e => {
+  formCreate.save().then(json=> {
 
-    e.preventDefault();
+    window.location.reload();
 
-    let formCreateData = new FormData(formCreate);
+  }).catch(err=>{
+    console.log(err);
+  });
 
-    fetch('/admin/menus', {
-      method:'POST',
-      body: formCreateData
-    }).then(response => response.json())
-      .then(json => {
+  [...document.querySelectorAll('.btn-delete')].forEach(btn=>{
 
-        window.location.reload();
+    btn.addEventListener('click', e=> {
+
+      let tr = e.path.find(el => {
+
+        return (el.tagName.toUpperCase() === 'TR');
+
+      });
+
+      let data = JSON.parse(tr.dataset.row);
+
+      if (confirm(`Deseja excluir o menu ${data.title}`)) {
+        fetch(`/admin/menus/${data.id}`, {
+        method: 'DELETE'
+        }).then(response => response.json())
+        .then(json => {
+          
+          window.location.reload();
+
+      });
+      }
 
     });
 
   });
 
-  let formUpdate = document.querySelector('#modal-update');
+// update data
+let formUpdate = document.querySelector("#modal-update form");
 
-  [...document.querySelectorAll('.btn-update')].forEach(btn => {
+formUpdate.save().then(json=> {
+
+window.location.reload();
+
+}).catch(err=>{
+console.log(err);
+});
+
+[...document.querySelectorAll('.btn-update')].forEach(btn => {
     btn.addEventListener('click', e => {
-
       let tr = e.path.find(el => {
 
         return (el.tagName.toUpperCase() === 'TR');
@@ -182,6 +214,7 @@
         switch (name) {
 
           case 'photo':
+            formUpdate.querySelector("img").src = '/'+data[name];
           break;
           default:
             let input = formUpdate.querySelector(`[name=${name}]`);

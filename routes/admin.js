@@ -2,15 +2,16 @@ var express = require('express');
 var user = require('./../inc/admin/users');
 var admin = require('./../inc/admin/admin');
 var menus = require('./../inc/menus');
+var reservations = require('./../inc/reservation');
 var router = express.Router();
 
 router.use(function(req, res, next) {
 
     if (['/login'].indexOf(req.url) === -1 && !req.session.user) {
-        res.redirect('/admin/login');
+        res.redirect("/admin/login");
     } else {
         next();
-    }
+    } 
 
 });
 
@@ -33,7 +34,7 @@ router.get("/", function(req, res, next){
 
     admin.dashboard().then(data => {
 
-        res.render('admin/index', admin.getParams(req, {
+        res.render("admin/index", admin.getParams(req, {
             data
         }));
 
@@ -51,7 +52,7 @@ router.get("/contacts", function(req, res, next){
 });
 
 // login
-router.post('/login', function(req, res, next){
+router.post("/login", function(req, res, next){
 
     if (!req.body.email) {
         user.render(req, res, 'Preencha o campo email');
@@ -63,7 +64,7 @@ router.post('/login', function(req, res, next){
 
             req.session.user = user;
 
-            res.redirect('/admin');
+            res.redirect("/admin");
 
         }).catch(err => {
             user.render(req, res, err.message || err);
@@ -108,8 +109,21 @@ router.post("/menus", function(req, res, next) {
     });
 
 });
+
+router.delete("/menus/:id", function(req, res, next) {
+
+    menus.delete(req.params.id).then(results=>{
+
+        res.send(results);
+
+    }).catch(err=>{
+        res.send(err);
+    });
+
+});
 // --||
 
+// reservas
 router.get("/reservations", function(req, res, next){
 
     res.render('admin/reservations', admin.getParams(req, {
@@ -117,6 +131,29 @@ router.get("/reservations", function(req, res, next){
     }));
 
 });
+
+router.post("/reservations", function(req, res, next) {
+
+    reservations.save(req.fields, req.files).then(results=> {
+        res.send(results);
+    }).catch(err=>{
+        res.send(err);
+    });
+
+});
+
+router.delete("/reservations/:id", function(req, res, next) {
+
+    reservations.delete(req.params.id).then(results=>{
+
+        res.send(results);
+
+    }).catch(err=>{
+        res.send(err);
+    });
+
+});
+// --||
 
 
 router.get("/users", function(req, res, next){
