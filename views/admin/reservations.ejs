@@ -64,17 +64,19 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>1.</td>
-                  <td>Hcode</td>
-                  <td>contato@hcode.com.br</td>
-                  <td>2</td>
-                  <td>1/1/2019</td>
-                  <td>10:30</td>
-                  <td><button type="button" class="btn btn-xs btn-info btn-update" data-toggle="modal" data-target="#modal-update"><i
+                <% data.forEach(row => { %> 
+                <tr data-row="<% JSON.stringify(row) %> ">
+                  <td><%= row.id %> </td>
+                  <td><%= row.name %></td>
+                  <td><%= row.email %></td>
+                  <td><%= row.people %></td>
+                  <td><%= moment(row.date).format("DD [de] MMMM [de] YYYY") %></td>
+                  <td><%= row.time %></td>
+                  <td><button type="button" class="btn btn-xs btn-info btn-update"><i
                         class="fa fa-pencil"></i> Editar</button>&nbsp;<button type="button" class="btn btn-xs btn-danger btn-delete"><i
                         class="fa fa-trash"></i> Excluir</button></td>
                 </tr>
+                <% }); %> 
               </tbody>
             </table>
           </div>
@@ -200,7 +202,6 @@
     <%- include('inc/page-footer') -%> 
 
   
-<script src="/js/hcode-filereader.js"></script>
 <script src="/js/hcode-formsave.js"></script>
 <script>
 
@@ -215,33 +216,6 @@ formCreate.save().then(json=> {
   console.log(err);
 });
 
-[...document.querySelectorAll('.btn-delete')].forEach(btn=>{
-
-  btn.addEventListener('click', e=> {
-
-    let tr = e.path.find(el => {
-
-      return (el.tagName.toUpperCase() === 'TR');
-
-    });
-
-    let data = JSON.parse(tr.dataset.row);
-
-    if (confirm(`Deseja excluir o menu ${data.title}`)) {
-      fetch(`/admin/menus/${data.id}`, {
-      method: 'DELETE'
-      }).then(response => response.json())
-      .then(json => {
-        
-        window.location.reload();
-
-    });
-    }
-
-  });
-
-});
-
 // update data
 let formUpdate = document.querySelector("#modal-update form");
 
@@ -253,32 +227,30 @@ window.location.reload();
 console.log(err);
 });
 
+// update data
 [...document.querySelectorAll('.btn-update')].forEach(btn => {
-  btn.addEventListener('click', e => {
-    let tr = e.path.find(el => {
+    btn.addEventListener('click', e => {
+      let tr = e.path.find(el => {
 
-      return (el.tagName.toUpperCase() === 'TR');
+        return (el.tagName.toUpperCase() === 'TR');
+
+      });
+
+      let data = JSON.parse(tr.dataset.row);
+
+      for (let name in data) {
+
+        switch (name) {
+          
+          default:
+            let input = formUpdate.querySelector(`[name=${name}]`);
+            if (input) input.value = data[name];
+        }
+      }
+
+      $('#modal-update').modal('show');
 
     });
-
-    let data = JSON.parse(tr.dataset.row);
-
-    for (let name in data) {
-
-      switch (name) {
-
-        case 'photo':
-          formUpdate.querySelector("img").src = '/'+data[name];
-        break;
-        default:
-          let input = formUpdate.querySelector(`[name=${name}]`);
-          if (input) input.value = data[name];
-      }
-    }
-
-    $('#modal-update').modal('show');
-
   });
-});
 
 </script>

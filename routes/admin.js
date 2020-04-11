@@ -3,7 +3,10 @@ var user = require('./../inc/admin/users');
 var admin = require('./../inc/admin/admin');
 var menus = require('./../inc/menus');
 var reservations = require('./../inc/reservation');
+var moment = require("moment");
 var router = express.Router();
+
+moment.locale("pt-BR");
 
 router.use(function(req, res, next) {
 
@@ -126,9 +129,15 @@ router.delete("/menus/:id", function(req, res, next) {
 // reservas
 router.get("/reservations", function(req, res, next){
 
-    res.render('admin/reservations', admin.getParams(req, {
-        date:{}
-    }));
+    reservations.getReserv().then(data => {
+
+        res.render('admin/reservations', admin.getParams(req, {
+            date:{},
+            data,
+            moment
+        }));
+
+    });
 
 });
 

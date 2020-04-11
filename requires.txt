@@ -1,5 +1,7 @@
+npm
 express
 mysql2
 redis
 express-session
 connect-redis
+moment
