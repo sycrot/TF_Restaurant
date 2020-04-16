@@ -6,6 +6,6 @@ const connection = mysql.createConnection({
     database: 'tf_restaurant',
     password: '',
     multipleStatements: true
-})
+});
 
 module.exports = connection;

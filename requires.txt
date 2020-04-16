@@ -5,3 +5,4 @@ redis
 express-session
 connect-redis
 moment
+chart.js // cd public/admin // bower install chart.js --save
