@@ -3,6 +3,8 @@ var user = require('./../inc/admin/users');
 var admin = require('./../inc/admin/admin');
 var menus = require('./../inc/menus');
 var reservations = require('./../inc/reservation');
+var contacts = require('./../inc/contact');
+var emails = require('../inc/admin/email');
 var moment = require("moment");
 var router = express.Router();
 
@@ -48,11 +50,30 @@ router.get("/", function(req, res, next){
 
 });
 
+
+// contacts
 router.get("/contacts", function(req, res, next){
 
-    res.render('admin/contacts', admin.getParams(req));
+    contacts.getContacts().then(data=>{
+        
+        res.render('admin/contacts', admin.getParams(req, {
+            data
+        }));
+
+    });
 
 });
+
+router.delete("/contacts/:id", function(req, res, next){
+
+    contacts.delete(req.params.id).then(results=>{
+        res.send(results);
+    }).catch(err=>{
+        res.send(err);
+    });
+
+});
+// ||--
 
 // login
 router.post("/login", function(req, res, next){
@@ -84,11 +105,29 @@ router.get("/login", function(req, res, next){
 });
 // --|
 
+// --emails
 router.get("/emails", function(req, res, next){
 
-    res.render('admin/emails', admin.getParams(req));
+    emails.getEmails().then(data=>{
+        
+        res.render('admin/emails', admin.getParams(req, {
+            data
+        }));
+
+    });
 
 });
+
+router.delete("/emails/:id", function(req, res, next){
+
+    emails.delete(req.params.id).then(results=>{
+        res.send(results);
+    }).catch(err=>{
+        res.send(err);
+    });
+
+});
+// ||--
 
 // --menus
 router.get("/menus", function(req, res, next){
@@ -185,6 +224,22 @@ router.post("/users", function(req, res, next){
 
     }).catch(err => {
         res.send(err);
+    });
+
+});
+
+router.post("/users/password-change", function(req, res, next) {
+
+    user.changePassword(req).then(results => {
+
+        res.send(results);
+
+    }).catch(err => {
+
+        res.send({
+            error: err
+        });
+
     });
 
 });

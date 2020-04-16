@@ -34,6 +34,8 @@ class Grid {
             }
         }, configs);
 
+        this.rows = [...document.querySelectorAll('table tbody tr')];
+
         this.init();
         this.initButtons();
 
@@ -43,26 +45,32 @@ class Grid {
         // create data
         this.formCreate = document.querySelector(this.options.formCreate);
 
-        this.formCreate.save().then(json=> {
+        if (this.formCreate) {
 
-            this.fireEvent('afterFormCreate');
+            this.formCreate.save({
+                success:()=>{
+                    this.fireEvent('afterFormCreate');
+                },
+                failure:()=>{
+                    this.fireEvent('afterFormCreateError');
+                }
+            });
 
-        }).catch(err=>{
-            this.fireEvent('afterFormCreateError');
-            console.log(err);
-        });
+        }
 
         // update data
         this.formUpdate = document.querySelector(this.options.formUpdate);
 
-        this.formUpdate.save().then(json=> {
-
-            this.fireEvent('afterFormUpdate');
-
-        }).catch(err=>{
-            this.fireEvent('afterFormUpdateError');
-            console.log(err);
-        });
+        if (this.formUpdate) {
+            this.formUpdate.save({
+                success:()=>{
+                    this.fireEvent('afterFormUpdate');
+                },
+                failure:()=>{
+                    this.fireEvent('afterFormUpdateError');
+                }
+            });
+        }
     }
 
     fireEvent(name, args) {
@@ -83,36 +91,29 @@ class Grid {
 
     }
 
-    initButtons() {
-        // update data
-        [...document.querySelectorAll(this.options.btnUpdate)].forEach(btn => {
+    btnUpdateClick(e) {
+
+        this.fireEvent('beforeUpdateClick',[e]);
+
+        let data = this.getTrData(e);
+
+        for (let name in data) {
+
+            this.options.onUpdateLoad(this.formUpdate, name, data);
             
-            btn.addEventListener('click', e => {
+        }
 
-                this.fireEvent('beforeUpdateClick',[e]);
+        this.fireEvent('afterUpdateClick',[e]);
 
-                let data = this.getTrData(e);
+    }
 
-                for (let name in data) {
+    btnDeleteClick(e) {
 
-                    this.options.onUpdateLoad(this.formUpdate, name, data);
-                    
-                }
+        this.fireEvent('beforeDeleteClick');
 
-                this.fireEvent('afterUpdateClick',[e]);
+        let data = this.getTrData(e);
 
-            });
-        });
-
-        [...document.querySelectorAll(this.options.btnDelete)].forEach(btn=>{
-
-        btn.addEventListener('click', e=> {
-
-            this.fireEvent('beforeDeleteClick');
-
-            let data = this.getTrData(e);
-
-            if (confirm(eval('`'+this.options.deleteMsg+'`'))) {
+        if (confirm(eval('`'+this.options.deleteMsg+'`'))) {
             fetch(eval('`'+this.options.deleteUrl+'`'), {
             method: 'DELETE'
             }).then(response => response.json())
@@ -120,9 +121,35 @@ class Grid {
                 this.fireEvent('afterDeleteClick');
 
             });
-            }
+        }
 
-        });
+    }
+
+    initButtons() {
+
+        this.rows.forEach(row => {
+
+            [...row.querySelectorAll('.btn')].forEach(btn => {
+
+                btn.addEventListener('click', e=> {
+
+                    if (e.target.classList.contains('btn-update')) {
+
+                        this.btnUpdateClick(e);
+
+                    } else if (e.target.classList.contains('btn-delete')) {
+
+                        this.btnDeleteClick(e);
+
+                    } else {
+
+                        this.fireEvent('buttonClick', [e.target, this.getTrData(e), e]);
+
+                    }
+
+                });
+
+            });
 
         });
     }

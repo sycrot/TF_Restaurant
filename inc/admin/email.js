@@ -1,31 +1,14 @@
-var conn = require('./db');
+var conn = require('../db');
 
 module.exports = {
-
-    render(req, res, error, success) {
-
-        res.render('contact', {
-            title: 'Contato - TF Restaurant',
-            background: 'images/img_bg_3.jpg',
-            h1: 'Diga um oioio',
-            isHome: false,
-            body: req.body,
-            error,
-            success
-        });
-
-    },
-
     save(fields) {
 
         return new Promise((resolve, reject) => {
 
             conn.query(`
-                INSERT INTO tb_contacts (name, email, message) VALUES(?, ?, ?)
+                INSERT INTO tb_emails (email) VALUES(?)
             `, [
-                fields.name,
-                fields.email,
-                fields.message
+                fields.email
             ], (err, results) => {
 
                 if (err) { reject(err); }
@@ -42,7 +25,7 @@ module.exports = {
         return new Promise((resolve, reject)=> {
 
             conn.query(`
-                DELETE FROM tb_contacts WHERE id = ?
+                DELETE FROM tb_emails WHERE id = ?
             `, [
                 id
             ], (err, results) => {
@@ -59,12 +42,12 @@ module.exports = {
 
     },
 
-    getContacts() {
+    getEmails() {
 
         return new Promise((resolve, reject) => {
 
             conn.query(`
-                SELECT * FROM tb_contacts ORDER BY register DESC
+                SELECT * FROM tb_emails ORDER BY register DESC
             `, (err, results) => {
 
                 if (err) {

@@ -3,6 +3,7 @@ var express = require('express');
 var menus = require('./../inc/menus');
 var reservation = require('./../inc/reservation');
 var contacts = require('./../inc/contact');
+var subscribe = require('./../inc/admin/email');
 var router = express.Router();
 
 /* GET home page. */
@@ -113,5 +114,25 @@ router.get('/services', function(req, res, next) {
 
 });
 // --|
+
+// subscribe
+router.post("/subscribe", function(req,res,next){
+
+  if(!req.fields.email) {
+    res.send({
+      error: "Preencha o e-mail"
+    });
+  } else {
+    subscribe.save(req.fields).then(results=> {
+
+      res.send(results);
+
+    }).catch(err => {
+        res.send(err);
+    });
+  }
+
+});
+// ||--
 
 module.exports = router;
